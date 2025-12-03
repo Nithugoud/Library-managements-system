@@ -141,17 +141,4 @@ npm run prisma:seed
 3. Check backend logs: `docker-compose logs backend`
 4. Check frontend logs: `docker-compose logs frontend`
 
-## Demo Video Checklist
-
-✅ Login with demo credentials
-✅ Show dashboard with stats
-✅ Browse books with filters
-✅ Add a new book
-✅ Manage authors
-✅ Borrow a book
-✅ View borrowed books
-✅ Return a book
-✅ Show Swagger documentation
-✅ Show mobile responsive design
-
 Happy coding! 🚀
