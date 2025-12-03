@@ -1,0 +1,138 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { FiMail, FiLock, FiBook } from 'react-icons/fi'
+import api from '../lib/api'
+import { useAuthStore } from '../store/authStore'
+
+interface LoginForm {
+  email: string
+  password: string
+}
+
+export default function Login() {
+  const navigate = useNavigate()
+  const { setAuth } = useAuthStore()
+  const [isLoading, setIsLoading] = useState(false)
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>()
+
+  const onSubmit = async (data: LoginForm) => {
+    setIsLoading(true)
+    try {
+      const response = await api.post('/auth/login', data)
+      const { token, user } = response.data
+      setAuth(token, user)
+      toast.success('Welcome back!')
+      navigate('/dashboard')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Login failed')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 animate-fade-in">
+        {/* Logo and Title */}
+        <div className="text-center">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 mb-4">
+            <FiBook className="text-white text-4xl" />
+          </div>
+          <h2 className="text-4xl font-bold gradient-text">Welcome Back</h2>
+          <p className="mt-2 text-gray-600">Sign in to your library account</p>
+        </div>
+
+        {/* Login Form */}
+        <div className="card animate-slide-up">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiMail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  {...register('email', { 
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
+                  className="input-field pl-10"
+                  placeholder="admin@library.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiLock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  {...register('password', { 
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters'
+                    }
+                  })}
+                  className="input-field pl-10"
+                  placeholder="••••••••"
+                />
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Signing in...
+                </div>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                Sign up
+              </Link>
+            </p>
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-800 font-medium mb-2">Demo Credentials:</p>
+            <p className="text-xs text-blue-700">Email: admin@library.com</p>
+            <p className="text-xs text-blue-700">Password: admin123</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
